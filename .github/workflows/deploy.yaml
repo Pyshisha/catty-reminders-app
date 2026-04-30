@@ -39,6 +39,12 @@ jobs:
             export MARIADB_PASSWORD=${{ secrets.DB_PASS }}
             export MARIADB_DATABASE=catty_reminders
 
+            export HOST_DB_PORT=3306
+            export CONTAINER_DB_PORT=3306
+            export HOST_APP_PORT=8181
+            export CONTAINER_APP_PORT=8181
+            export APP_CONTAINER_NAME=catty-app
+            export DB_CONTAINER_NAME=catty-db
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             docker compose pull
