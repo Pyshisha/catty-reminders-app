@@ -1,8 +1,13 @@
 {
-  "db_path": "reminder_db.json",
-
+  "storage": {
+    "type": "mysql",
+    "host": "db",
+    "port": 3306,
+    "user": "pyshisha",
+    "password": "mypass",
+    "database": "catty_reminders"
+  },
   "secret_key": "Cats are awesome!",
-  
   "users": {
     "heisenberg": "P@ssw0rd",
     "tester": "foobar123"
