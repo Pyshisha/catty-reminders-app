@@ -2,21 +2,32 @@ name: CI
 
 on:
   push:
-    branches:
-      - lab3*
+    branches: [ lab4* ]
   pull_request:
-    branches:
-      - lab3*
+    branches: [ lab4* ]
 
 permissions:
   contents: read
   packages: write
 
 jobs:
-  test:
+  docker-lint:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Hadolint
+        run: docker run --rm -i hadolint/hadolint hadolint - < Dockerfile
+
+  test:
+    needs: docker-lint
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: mariadb:11.8.6-ubi9
+        env:
+          MARIADB_ROOT_PASSWORD: mypass
+          MARIADB_DATABASE: catty_reminders
+        ports: [ 3306:3306 ]
 
     steps:
       - uses: actions/checkout@v4
@@ -24,13 +35,17 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
           pip install pytest pytest-playwright
           playwright install chromium
+
+      - name: Patch config for CI
+        run: |
+          sed -i 's/"host": "db"/"host": "127.0.0.1"/g' config.json
 
       - name: Start application
         run: |
@@ -52,6 +67,10 @@ jobs:
   docker-build:
     needs: test
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - uses: actions/checkout@v4
